@@ -1,5 +1,5 @@
 function onDatabaseReady() {
-    populateTableUI() // DO NOT TOUCH THIS LINE until step #4
+    // populateTableUI() // DO NOT TOUCH THIS LINE until step #4
 
     console.log(db);
     // DexieJS docs: https://dexie.org/
@@ -7,15 +7,17 @@ function onDatabaseReady() {
 
 
 function deleteBook(event) {
-  db.books.delete(event).then(function(deleted) {
+  db.books
+    .where("title").equals(event).delete()
+    .then(function(deleted) {
     if (deleted) {
+      console.log(deleted)
       console.log(`${event} deleted.`);
     } else {
+      console.log(deleted)
       console.log(`Error: failed to delete ${event}`);
     }
   });
-
-
 }
 
 function addBook(event) {
