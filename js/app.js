@@ -27,7 +27,8 @@ function addBook(event) {
       cover: document.querySelector("#inputCover").value,
       synopsis: document.querySelector("#inputSynopsis").value,
       publishDate: document.querySelector("#inputDate").value,
-      publishDate: document.querySelector("#inputRating").value
+      rating: document.querySelector("#inputRating").value,
+
     }).then(function(create) {
       if (create) {
         console.log(document.querySelector("#inputTitle").value)
