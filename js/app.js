@@ -1,5 +1,5 @@
 function onDatabaseReady() {
-    // populateTableUI() // DO NOT TOUCH THIS LINE until step #4
+    populateTableUI() // DO NOT TOUCH THIS LINE until step #4
 
     console.log(db);
     // DexieJS docs: https://dexie.org/
@@ -7,20 +7,35 @@ function onDatabaseReady() {
 
 
 function deleteBook(event) {
-  db.books
-    .where("title").equals(event).delete()
+  db.books.delete(event)
+    // .where("title").equals(event).delete()
     .then(function(deleted) {
-    if (deleted) {
-      console.log(deleted)
       console.log(`${event} deleted.`);
-    } else {
-      console.log(deleted)
-      console.log(`Error: failed to delete ${event}`);
-    }
   });
+  //strip out table and rerender
+  document.querySelector("tbody").innerHTML = "";
+  populateTableUI();
 }
 
 function addBook(event) {
+  event.preventDefault()
+  if (document.querySelector("#inputTitle").value) {
+    const newBook = db.books.put({
+      title: document.querySelector("#inputTitle").value,
+      author: document.querySelector("#inputAuthor").value,
+      numberOfPages: document.querySelector("#inputPages").value,
+      cover: document.querySelector("#inputCover").value,
+      synopsis: document.querySelector("#inputSynopsis").value,
+      publishDate: document.querySelector("#inputDate").value,
+      publishDate: document.querySelector("#inputRating").value
+    }).then(function(create) {
+      if (create) {
+        console.log(document.querySelector("#inputTitle").value)
+      } else {
+        console.log("Error: Failed to Add Book")
+      }
+    })
+  } else {
     // books: 'title,author,numberOfPages,cover,synopsis,publishDate,rating'
     const newBook = db.books.put({
       title: event.title,
@@ -32,13 +47,21 @@ function addBook(event) {
       rating: event.rating
     }).then(function(create) {
       if (create) {
-        populateTableUI(event.title);
+        // populateTableUI(event.title);
+        console.log(document.querySelector("#inputTitle").value)
       } else {
         console.log("Error: Failed to Add Book")
       }
     })
-    // Hint: Once you've added the book to your database, call populateTableUI with the added book's title
-    // Check out the Table.put() method and what it returns at: https://dexie.org/docs/Table/Table.put()
+  }
+  let form = document.querySelector("form")
+  form.reset();
+
+  //strip out table and rerender
+  document.querySelector("tbody").innerHTML = "";
+  populateTableUI();
+  // Hint: Once you've added the book to your database, call populateTableUI with the added book's title
+  // Che]ck out the Table.put() method and what it returns at: https://dexie.org/docs/Table/Table.put()
 }
 
 
@@ -67,6 +90,36 @@ function editBook(event) {
 
 // ************ 4. (BONUS) Comment out line 67 in ../index.HTML and write your own 'populateTableUI' function in app.js ************
 
+
+async function populateTableUI() {
+  const columns = ['cover', 'title', 'author', 'numberOfPages', 'synopsis', 'publishDate', 'rating'];
+  let allBooks = await db.books.where('title').aboveOrEqual(0).toArray()
+  console.log(allBooks)
+
+  for (let i = 0; i < allBooks.length; i++) {
+    var tableRow = document.createElement('tr')
+
+    for (let j = 0; j < columns.length; j++) {
+      if (j == 1)  {
+        let bookTitle = allBooks[i][columns[j]]
+        var deleteBtn = document.createElement('button');
+        deleteBtn.innerText = 'delete book';
+        deleteBtn.addEventListener("click", function(e) {
+          deleteBook(bookTitle)
+        })
+      };
+
+      let td = document.createElement('td')
+      td.innerText = (allBooks[i][columns[j]] ? allBooks[i][columns[j]] : "")
+      tableRow.append(td);
+    }
+
+    tableRow.append(deleteBtn)
+    document.querySelector("tbody").append(tableRow)
+  }
+
+  document.querySelector("tbody").append(tableRow);
+}
 
 // Now that you’ve cloned your project lets start by testing our code. Let's start live
 //server and open up our project in the browser. Open up your console and you should see
